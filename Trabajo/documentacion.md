@@ -33,9 +33,35 @@ Necesitamos introducir la clave pública del ssh en el proyecto, para generar el
 La opción -f indica el nombre del fichero y la opción -C el nombre de usuario de la clave.
 Nos dirigimos al panel de control, Compute Engine --> Metadatos --> Claves ssh. Pulsamos el botón añadir ssh y debemos de introducir todo el contenido del archivo key_cge.pub.
 
+![](Capturas/introducirclasessh1.png)
+![](Capturas/introducirclasessh2.png)
+
 Ahora debemos de obtener la id del proyecto, el client email (acabado en gserviceaccount.com) y la clave de cuenta del servicio en formato JSON. Para esto último vamos a credenciales --> Crear credenciales --> Clave de cuenta del servicio
 --> JSON y usamos una ruta de archivo seguro.
+
+![](Capturas/credencialesjson.png)
 
 ### Apertura http ###
 
 Para que nuestro bot de Telegram responda a las peticiones de los usuarios necesitamos abrir el http del IaaS. Para esto vamos a Compute Engine --> Instancias de VM. Editamos la instancia que tenemos creada y pulsamos sobre la opción http.
+
+![](Capturas/http.png)
+
+### Obtener bot ###
+
+Para obtener un bot de Telegram he seguido los pasos de este [enlace](https://www.xatakamovil.com/aplicaciones/llegan-los-bots-a-telegram-como-crear-el-tuyo-propio).
+
+1. Introduzco en el buscador de Telegram **BotFather**.
+2. Introduzco **/start** en la conversación con dicho bot.
+3. Indico que quiero crear un bot **/newbot**.
+4. El nombre del bot será **PaisesYCapitales**.
+5. El nombre de usuario dle bot es **paisesycapitalesbot**. Importante que acabe en bot.
+6. BotFather nos dará un token que debemos de almacenar y que usaremos para que nuestro bot pueda recibir peticiones y contestar a los usuarios.
+
+El proceso que he seguido lo dejo en imágenes.
+
+![](Capturas/bot1.png)
+
+![](Capturas/bot2.png)
+
+Obviamente en la última linea de la segunda imagen, justo después nos da el token, que no lo muestro por pantalla.
