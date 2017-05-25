@@ -73,7 +73,7 @@ El bot no es relevante en este trabajo, ya que lo que quería es que el IaaS fun
 
 El repositorio del bot dentro de mi cuenta de GitHub es [este](https://github.com/Antkk10/BotPaisesYCapitales).
 
-### Despliegue. ###
+### Pasos previos al despligue ###
 Primero debemos de guardar las credenciales que obtuvimos anteriormente. Para ello en el terminal debemos de poner:
 
     export PROJECT_ID=Nuestro_id_del_proyecto
@@ -84,38 +84,38 @@ Primero debemos de guardar las credenciales que obtuvimos anteriormente. Para el
 
 El despliegue lo he hecho con las herramientas mencionadas al principio del documento. Lo primero que debemos hacer es crear el archivo **Vagrantfile**. Esto es necesario para poder realizar el despliegue de nuestra máquina virtual en la nube. En este archivo indicamos todo lo necesario que debe de tener nuestra máquina, y su contenido es el siguiente:
 
-Vagrant.configure('2') do |config|
-  config.vm.box = 'google/gce' # Indicamos el tipo de caja
+    Vagrant.configure('2') do |config|
+      config.vm.box = 'google/gce' # Indicamos el tipo de caja
 
-  config.vm.provider :google do |google, override|
+      config.vm.provider :google do |google, override|
 
-    # each of the below values will default to use the env vars named as below if not specified explicitly
-    google.google_project_id = ENV['PROJECT_ID']
-    google.google_client_email = ENV['CLIENT_EMAIL']
-    google.google_json_key_location = ENV['KEY_LOCATION']
+        # each of the below values will default to use the env vars named as below if not specified explicitly
+        google.google_project_id = ENV['PROJECT_ID']
+        google.google_client_email = ENV['CLIENT_EMAIL']
+        google.google_json_key_location = ENV['KEY_LOCATION']
 
 
-    # Indicamos el SO en gce.
-    google.image = 'ubuntu-1604-xenial-v20160721'
-    google.zone = 'europe-west1-b' # Localización
-    google.name = 'paises-y-capitales'
-    google.machine_type='g1-small'
+        # Indicamos el SO en gce.
+        google.image = 'ubuntu-1604-xenial-v20160721'
+        google.zone = 'europe-west1-b' # Localización
+        google.name = 'paises-y-capitales'
+        google.machine_type='g1-small'
 
-    # ssh
-    config.ssh.username = 'Antkk10'
-    config.ssh.private_key_path ='/Users/antoniomfc90/.ssh/key_gce'
+        # ssh
+        config.ssh.username = 'Antkk10'
+        config.ssh.private_key_path ='/Users/antoniomfc90/.ssh/key_gce'
 
-  end
+      end
 
-  #Provisionamiento
-  config.vm.provision "ansible" do |ansible|
-      ansible.sudo = true
-      ansible.playbook = "playbock.yml"
-      ansible.verbose = "v"
-      ansible.host_key_checking = false
+      #Provisionamiento
+      config.vm.provision "ansible" do |ansible|
+          ansible.sudo = true
+          ansible.playbook = "playbock.yml"
+          ansible.verbose = "v"
+          ansible.host_key_checking = false
+        end
+
     end
-
-end
 
 Lo primero que ponemos es el nombre de la caja, **google/gce**.
 Dentro de la configuración del proveedor (Google), debemos de indicar las credenciales que hemos obtenido para poder conectarnos. Después indicamos la configuración de la máquina (estos datos los vemos en la instancia de la página web).
@@ -226,3 +226,73 @@ He instalado el servicio **supervisor** dentro de la instancia para que esté ej
 - Por último indicamos donde almacena toda la información de la ejecución del bot.
 
 Tengo que comentar que normalmente el supervisor funciona con **sudo supervisorctl start botpaisesycapitales**, sin embargo con la instancia he tenido problemas, por lo tanto antes de iniciar la supervisión, he tenido que ejecutar **sudo supervisorctl reload** y después **sudo supervisorctl reload**. Todo esta información la he encontrado en [stackoverflow](https://stackoverflow.com).
+
+#### Makefile ####
+
+He creado un makefile para que el despliegue, aprovisionamiento y todas las ordenes que se ejecutan sobre la instancia sean mucho más sencillas. El contenido del makefile es el siguiente:
+
+    desplegar:
+    		vagrant up --provider=google
+
+    provisionar:
+    		vagrant provision
+
+    clonar:
+    		fab -H Antkk10@130.211.83.45 -i /Users/antoniomfc90/.ssh/key_gce Clonar
+
+    ejecutar:
+    		fab -H Antkk10@130.211.83.45 -i /Users/antoniomfc90/.ssh/key_gce EjecutarApp
+
+    stop:
+    		fab -H Antkk10@130.211.83.45 -i /Users/antoniomfc90/.ssh/key_gce StopApp
+
+    destruir:
+    		vagrant destroy -f
+
+    borrar:
+    		fab -H Antkk10@130.211.83.45 -i /Users/antoniomfc90/.ssh/key_gce borrar
+
+Para algunos casos es mucho más sencillo de recordar y de introducir en el terminal si pongo:
+
+    make ejecutar
+
+que
+
+    fab -H Antkk10@130.211.83.45 -i /Users/antoniomfc90/.ssh/key_gce EjecutarApp
+
+así si necesito hacer modificaciones o simplemente necesito ejecutar la aplicación muchas veces a lo largo del día, el proceso es mucho más sencillo.
+
+### Despliegue ###
+
+Una vez que tenemos todos los archivos creados, nos situamos en la carpeta donde están todos ellos y ejecutamos:
+
+    make desplegar
+
+Esta orden se traduce en
+
+    vagrant up --provider=google
+
+que es el comando con el que se debe de desplegar la máquina en el IaaS.
+
+![](Capturas/despliegue.png)
+
+Después del despliegue normalmente suele hacerse el provisionamiento sin indicar nada. Para asegurarnos de que se provisiona la máquina introducimos:
+
+    make provisionar
+
+que equivale a
+
+    vagrant provision
+
+Estas dos órdenses son las más sencillas de ejecutar. Donde tiene más sentido es a la hora de usar fabric y el proceso para instalar y ejecutar la aplicación sería el siguiente:
+
+    make clonar
+    make ejecutar
+
+![](Capturas/clonar.png)
+
+![](Capturas/ejecutar.png)
+
+Una vez que tenemos la aplicación en funcionamiento podemos ver que responde a nuestras peticiones.
+
+![](Capturas/botejecutando.png)
