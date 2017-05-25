@@ -138,38 +138,91 @@ Yo he usado la segunda opción y considero que es la mejor ya que puedes instala
 
 El contenido de **playbock.yml** es el siguiente:
 
-- hosts: all
-  sudo: yes
-  remote_user: Antkk10
-  vars:
-    TOKENBOT: "{{ lookup('env','TOKENBOT') }}"
-  tasks:
-  - name: Actualizar
-    command: sudo apt-get update
-  - name: Instalar setuptools python
-    apt: name=python-setuptools state=present
-  - name: Instalar python-dev
-    apt: name=python-dev state=present
-  - name: Instalar libpq-dev python
-    apt: name=libpq-dev state=present
-  - name: Instalar build-essential python
-    apt: name=build-essential state=present
-  - name: Instalar python-psycopg2
-    apt: name=python-psycopg2 state=present
-  - name: Instalar git
-    apt: name=git state=present
-  - name: Instalar pip
-    apt: name=python-pip state=present
-  - name: Instalamos la API del bot
-    command: sudo pip install python-telegram-bot
-  - name: Instalamos flud para el supervisor
-    command: sudo pip install flup
-  - name: Instalar supervisor
-    command: sudo apt-get install -y supervisor
-  - name: Configura programa para supervisor
-    template: src=supervisorbot.conf dest=/etc/supervisor/conf.d/supervisorbot.conf
-  - name: Ejecutar supervisor
-    service: name=supervisor state=started
+    - hosts: all
+      sudo: yes
+      remote_user: Antkk10
+      vars:
+        TOKENBOT: "{{ lookup('env','TOKENBOT') }}"
+      tasks:
+      - name: Actualizar
+        command: sudo apt-get update
+      - name: Instalar setuptools python
+        apt: name=python-setuptools state=present
+      - name: Instalar python-dev
+        apt: name=python-dev state=present
+      - name: Instalar libpq-dev python
+        apt: name=libpq-dev state=present
+      - name: Instalar build-essential python
+        apt: name=build-essential state=present
+      - name: Instalar python-psycopg2
+        apt: name=python-psycopg2 state=present
+      - name: Instalar git
+        apt: name=git state=present
+      - name: Instalar pip
+        apt: name=python-pip state=present
+      - name: Instalamos la API del bot
+        command: sudo pip install python-telegram-bot
+      - name: Instalamos flud para el supervisor
+        command: sudo pip install flup
+      - name: Instalar supervisor
+        command: sudo apt-get install -y supervisor
+      - name: Configura programa para supervisor
+        template: src=supervisorbot.conf dest=/etc/supervisor/conf.d/supervisorbot.conf
+      - name: Ejecutar supervisor
+        service: name=supervisor state=started
 
 Como podemos ver, indicamos el nombre de usuario y la opción de sudo. Introducimos la variable de entorno del token del bot para que esté almacenada en el sistema.
-Todo lo demás simula el típico sudo apt install -y ... que solemos hacer para instalar herramientas o servicios en Unix.
+Todo lo demás simula el típico **sudo apt install -y ...** que solemos hacer para instalar herramientas o servicios en Unix.
+
+#### Fabric ####
+
+Fabric nos permite ejecutar ordenes de forma remota dentro de la máquina virtual. Mi archivo **fabfile.py** tiene este contenido:
+
+    # coding: utf-8
+
+    from fabric.api import sudo, cd, env, run, shell_env
+    import os
+
+    def Clonar():
+        """ Descarga el repositorio. """
+        run('git clone https://github.com/Antkk10/BotPaisesYCapitales.git')
+        run('cd BotPaisesYCapitales/ && pip install -r requirements.txt')
+
+    def EjecutarApp():
+        """ Función para ejecutar el Bot. """
+        with shell_env(TOKENBOT=os.environ['TOKENBOT']):
+            run('sudo supervisorctl reload')
+            run('sudo supervisorctl update')
+            run('sudo supervisorctl start botpaisesycapitales')
+
+    def StopApp():
+        """ Función que para el bot. """
+        run('sudo supervisorctl stop botpaisesycapitales')
+
+    def borrar():
+        run('rm -Rf BotPaisesYCapitales/')
+
+Contiene ordenes que se ejecutarán dentro de la instancia como clonar el repositorio del bot, ejecutar el supervisor sobre el ejecutable, para el supervisor y borrar el código del bot.
+
+#### Supervisor ####
+He instalado el servicio **supervisor** dentro de la instancia para que esté ejecutando en todo el archivo **paisesycapitalesbot.py**. Esto es necesario para que el bot esté disponible las 24 horas en todo momento. Para que el supervisor funcione correctamente debemos crear un archivo de configuración, que en para el caso del bot es el siguiente:
+
+    [program: botpaisesycapitales]
+    autostart=false
+    command=python paisesycapitalesbot.py
+    user=Antkk10
+    directory=/home/Antkk10/BotPaisesYCapitales/bot
+    environment= TOKENBOT="{{TOKENBOT}}"
+    redirect_stderr=true
+    stdout_logfile=/var/log/supervisor/botpaisesycapitales.log
+    stderr_logfile=/var/log/supervisor/botpaisesycapitales-error.log
+
+- Identificador: **botpaisesycapitales**.
+- Autostart a false.
+- El comando que ejecuta siempre el supervisor es **python paisesycapitalesbot.py**
+- El nombre de usuario es **Antkk10**.
+- El directorio donde está el archivo .py es **/home/Antkk10/BotPaisesYCapitales/bot**.
+- Usa el token del bot de la variable de entorno.
+- Por último indicamos donde almacena toda la información de la ejecución del bot.
+
+Tengo que comentar que normalmente el supervisor funciona con **sudo supervisorctl start botpaisesycapitales**, sin embargo con la instancia he tenido problemas, por lo tanto antes de iniciar la supervisión, he tenido que ejecutar **sudo supervisorctl reload** y después **sudo supervisorctl reload**. Todo esta información la he encontrado en [stackoverflow](https://stackoverflow.com).
