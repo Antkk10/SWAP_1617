@@ -274,7 +274,7 @@ Esta orden se traduce en
 
 que es el comando con el que se debe de desplegar la máquina en el IaaS.
 
-![](Capturas/despliegue.png)
+![](Capturas/depsliegue.png)
 
 Después del despliegue normalmente suele hacerse el provisionamiento sin indicar nada. Para asegurarnos de que se provisiona la máquina introducimos:
 
