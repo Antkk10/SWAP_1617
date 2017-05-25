@@ -66,3 +66,9 @@ El proceso que he seguido lo dejo en imágenes.
 ![](Capturas/bot2.png)
 
 Obviamente en la última linea de la segunda imagen, justo después nos da el token, que no lo muestro por pantalla.
+
+La funcionalidad del token la muestro en este [enlace](https://github.com/Antkk10/BotPaisesYCapitales/blob/master/bot/paisesycapitalesbot.py). Simplemente responde a **/Start** que nos da la bienvenida y **/Francia** que responde con la capital de dicho país.
+
+El bot no es relevante en este trabajo, ya que lo que quería es que el IaaS funcione correctamente, permitiendo a nuestra aplicación recibir y responder peticiones.
+
+El repositorio del bot dentro de mi cuenta de GitHub es [este](https://github.com/Antkk10/BotPaisesYCapitales).
