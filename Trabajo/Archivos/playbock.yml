@@ -1,0 +1,32 @@
+- hosts: all
+  sudo: yes
+  remote_user: Antkk10
+  vars:
+    TOKENBOT: "{{ lookup('env','TOKENBOT') }}"
+  tasks:
+  - name: Actualizar
+    command: sudo apt-get update
+  - name: Instalar setuptools python
+    apt: name=python-setuptools state=present
+  - name: Instalar python-dev
+    apt: name=python-dev state=present
+  - name: Instalar libpq-dev python
+    apt: name=libpq-dev state=present
+  - name: Instalar build-essential python
+    apt: name=build-essential state=present
+  - name: Instalar python-psycopg2
+    apt: name=python-psycopg2 state=present
+  - name: Instalar git
+    apt: name=git state=present
+  - name: Instalar pip
+    apt: name=python-pip state=present
+  - name: Instalamos la API del bot
+    command: sudo pip install python-telegram-bot
+  - name: Instalamos flud para el supervisor
+    command: sudo pip install flup
+  - name: Instalar supervisor
+    command: sudo apt-get install -y supervisor
+  - name: Configura programa para supervisor
+    template: src=supervisorbot.conf dest=/etc/supervisor/conf.d/supervisorbot.conf
+  - name: Ejecutar supervisor
+    service: name=supervisor state=started

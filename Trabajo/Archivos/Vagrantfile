@@ -1,0 +1,32 @@
+Vagrant.configure('2') do |config|
+  config.vm.box = 'google/gce' # Indicamos el tipo de caja
+
+  config.vm.provider :google do |google, override|
+
+    # each of the below values will default to use the env vars named as below if not specified explicitly
+    google.google_project_id = ENV['PROJECT_ID']
+    google.google_client_email = ENV['CLIENT_EMAIL']
+    google.google_json_key_location = ENV['KEY_LOCATION']
+
+
+    # Indicamos el SO en gce.
+    google.image = 'ubuntu-1604-xenial-v20160721'
+    google.zone = 'europe-west1-b' # Localización
+    google.name = 'paises-y-capitales'
+    google.machine_type='g1-small'
+
+    # ssh
+    config.ssh.username = 'Antkk10'
+    config.ssh.private_key_path ='/Users/antoniomfc90/.ssh/key_gce'
+
+  end
+
+  #Provisionamiento
+  config.vm.provision "ansible" do |ansible|
+      ansible.sudo = true
+      ansible.playbook = "playbock.yml"
+      ansible.verbose = "v"
+      ansible.host_key_checking = false
+    end
+
+end
