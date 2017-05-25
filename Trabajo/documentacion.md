@@ -34,12 +34,13 @@ La opción -f indica el nombre del fichero y la opción -C el nombre de usuario 
 Nos dirigimos al panel de control, Compute Engine --> Metadatos --> Claves ssh. Pulsamos el botón añadir ssh y debemos de introducir todo el contenido del archivo key_cge.pub.
 
 ![](Capturas/introducirclasessh1.png)
-![](Capturas/introducirclasessh2.png)
+
+![](Capturas/introducirclavessh2.png)
 
 Ahora debemos de obtener la id del proyecto, el client email (acabado en gserviceaccount.com) y la clave de cuenta del servicio en formato JSON. Para esto último vamos a credenciales --> Crear credenciales --> Clave de cuenta del servicio
 --> JSON y usamos una ruta de archivo seguro.
 
-![](Capturas/credencialesjson.png)
+![](Capturas/crearcredencialesjson.png)
 
 ### Apertura http ###
 
